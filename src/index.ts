@@ -1,7 +1,6 @@
 import { httpServer } from "./app-server/index";
-import { mouse } from "@nut-tree/nut-js";
 import "dotenv/config";
-import "./wss-server/index";
+import { wss } from "./wss-server/index";
 
 const APP_PORT = +process.env.APP_PORT || 3000;
 
@@ -11,5 +10,6 @@ httpServer.listen(APP_PORT, () => {
 
 process.on("SIGINT", async () => {
     httpServer.close();
+    wss.close();
     process.exit();
 });

@@ -1,24 +1,47 @@
 import { createWebSocketStream, WebSocketServer } from "ws";
 import { IWebSocket } from "../types";
 import { IncomingMessage } from "http";
+import { Duplex } from "stream";
+import { RemoteControl } from "../app/app";
 
 const WSS_PORT = +process.env.WSS_PORT || 8080;
-const wss = new WebSocketServer({ port: WSS_PORT });
+export const wss = new WebSocketServer({ port: WSS_PORT });
+const remoteControl = new RemoteControl();
 
 const interval = setInterval(function ping() {
     wss.clients.forEach((ws: any) => {
-        if (ws.isAlive === false) return ws.terminate();
+        if (!ws.isAlive) return ws.terminate();
 
         ws.isAlive = false;
         ws.ping();
     });
 }, 30000);
 
+const readData = (duplex: Duplex) => {
+    return async () => {
+        for await (let chunk of duplex) {
+            const [command, ...params] = chunk.split(" ");
+            const [x, y] = params.map(Number);
+
+            if (remoteControl[command]) {
+                const result = await remoteControl[command](command, x, y);
+                duplex.write(`${result}`);
+            } else {
+                console.log(command);
+            }
+            try {
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    };
+};
+
 wss.on("connection", async (ws: IWebSocket, req: IncomingMessage) => {
     const duplex = createWebSocketStream(ws, {
         encoding: "utf8",
         decodeStrings: false,
-    });
+    }).setMaxListeners(0);
     ws.on("close", () => {
         duplex.destroy();
     });
@@ -26,7 +49,7 @@ wss.on("connection", async (ws: IWebSocket, req: IncomingMessage) => {
     ws.on("pong", () => {
         ws.isAlive = true;
     });
-    // duplex.on("readable", readable(duplex));
+    duplex.on("readable", readData(duplex));
 });
 
 wss.on("close", () => {
