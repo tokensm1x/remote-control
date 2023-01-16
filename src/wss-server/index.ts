@@ -4,11 +4,11 @@ import { IncomingMessage } from "http";
 import { Duplex } from "stream";
 import { RemoteControl } from "../app/app";
 
-const WSS_PORT = +process.env.WSS_PORT || 8080;
-export const wss = new WebSocketServer({ port: WSS_PORT });
-const remoteControl = new RemoteControl();
+const WSS_PORT: number = +process.env.WSS_PORT || 8080;
+export const wss: WebSocketServer = new WebSocketServer({ port: WSS_PORT });
+const remoteControl: RemoteControl = new RemoteControl();
 
-const interval = setInterval(function ping() {
+const interval: ReturnType<typeof setInterval> = setInterval(function ping() {
     wss.clients.forEach((ws: any) => {
         if (!ws.isAlive) return ws.terminate();
 
@@ -24,13 +24,13 @@ const readData = (duplex: Duplex) => {
             const [x, y] = params.map(Number);
 
             if (remoteControl[command]) {
-                const result = await remoteControl[command](command, x, y);
+                const result: string = await remoteControl[command](command, x, y);
                 duplex.write(`${result}`);
             } else {
                 console.log(command);
             }
             try {
-            } catch (err) {
+            } catch (err: any) {
                 console.error(err);
             }
         }
@@ -38,7 +38,7 @@ const readData = (duplex: Duplex) => {
 };
 
 wss.on("connection", async (ws: IWebSocket, req: IncomingMessage) => {
-    const duplex = createWebSocketStream(ws, {
+    const duplex: Duplex = createWebSocketStream(ws, {
         encoding: "utf8",
         decodeStrings: false,
     }).setMaxListeners(0);
