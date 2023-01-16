@@ -3,49 +3,60 @@ import { mouse, left, right, down, up, Button } from "@nut-tree/nut-js";
 export class RemoteControl {
     constructor() {}
 
-    async mouse_left(command: string, px: number): Promise<string> {
+    public async mouse_left(command: string, px: number): Promise<string> {
         await mouse.move(left(px));
         return command;
     }
 
-    async mouse_right(command: string, px: number): Promise<string> {
+    public async mouse_right(command: string, px: number): Promise<string> {
         await mouse.move(right(px));
         return command;
     }
 
-    async mouse_down(command: string, px: number): Promise<string> {
+    public async mouse_down(command: string, px: number): Promise<string> {
         await mouse.move(down(px));
         return command;
     }
 
-    async mouse_up(command: string, px: number): Promise<string> {
+    public async mouse_up(command: string, px: number): Promise<string> {
         await mouse.move(up(px));
         return command;
     }
 
-    async mouse_position(command: string): Promise<string> {
+    public async mouse_position(command: string): Promise<string> {
         const position = await mouse.getPosition();
         return command + ` ${position.x},${position.y}`;
     }
 
-    async draw_square(command: string, px: number): Promise<string> {
+    public async draw_square(command: string, px: number): Promise<string> {
         await mouse.pressButton(Button.LEFT);
         await mouse.move(right(px));
+        await this.releasePressedButton();
         await mouse.move(down(px));
+        await this.releasePressedButton();
         await mouse.move(left(px));
+        await this.releasePressedButton();
         await mouse.move(up(px));
         await mouse.releaseButton(Button.LEFT);
         return command;
     }
 
-    async draw_rectangle(command: string, px: number, py: number): Promise<string> {
+    public async draw_rectangle(command: string, px: number, py: number): Promise<string> {
         await mouse.pressButton(Button.LEFT);
         await mouse.move(right(px));
+        await this.releasePressedButton();
         await mouse.move(down(py));
+        await this.releasePressedButton();
         await mouse.move(left(px));
+        await this.releasePressedButton();
         await mouse.move(up(py));
         await mouse.releaseButton(Button.LEFT);
         return command;
+    }
+
+    private async releasePressedButton() {
+        await mouse.releaseButton(Button.LEFT);
+        await mouse.pressButton(Button.LEFT);
     }
 
     // async draw_circle(command, px, py) {
