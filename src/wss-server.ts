@@ -2,7 +2,7 @@ import { createWebSocketStream, WebSocketServer } from "ws";
 import { IWebSocket } from "./types";
 import { IncomingMessage } from "http";
 import { Duplex } from "stream";
-import { RemoteControl } from "./app";
+import { RemoteControl } from "./remote-control";
 
 const WSS_PORT: number = +process.env.WSS_PORT || 8080;
 export const wss: WebSocketServer = new WebSocketServer({ port: WSS_PORT });
