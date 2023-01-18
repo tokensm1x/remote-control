@@ -1,8 +1,8 @@
 import { createWebSocketStream, WebSocketServer } from "ws";
-import { IWebSocket } from "../types";
+import { IWebSocket } from "./types";
 import { IncomingMessage } from "http";
 import { Duplex } from "stream";
-import { RemoteControl } from "../app/app";
+import { RemoteControl } from "./app";
 
 const WSS_PORT: number = +process.env.WSS_PORT || 8080;
 export const wss: WebSocketServer = new WebSocketServer({ port: WSS_PORT });
@@ -20,16 +20,16 @@ const interval: ReturnType<typeof setInterval> = setInterval(function ping() {
 const readData = (duplex: Duplex) => {
     return async () => {
         for await (let chunk of duplex) {
-            const [command, ...params] = chunk.split(" ");
-            const [x, y] = params.map(Number);
-
-            if (remoteControl[command]) {
-                const result: string = await remoteControl[command](command, x, y);
-                duplex.write(`${result}`);
-            } else {
-                console.log(command);
-            }
             try {
+                const [command, ...params] = chunk.split(" ");
+                const [x, y] = params.map(Number);
+
+                if (remoteControl[command]) {
+                    const result: string = await remoteControl[command](command, x, y);
+                    duplex.write(`${result}`);
+                } else {
+                    console.log(command);
+                }
             } catch (err: any) {
                 console.error(err);
             }

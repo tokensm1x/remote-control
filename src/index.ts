@@ -1,6 +1,6 @@
-import { httpServer } from "./app-server/index";
+import { httpServer } from "./http-server";
 import "dotenv/config";
-import { wss } from "./wss-server/index";
+import { wss } from "./wss-server";
 
 const APP_PORT: number = +process.env.APP_PORT || 3000;
 
